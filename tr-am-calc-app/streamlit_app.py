@@ -23,17 +23,17 @@ avg_podium_medal_price = st.number_input("Prezzo medio di una medaglia per il po
 avg_cup_price = st.number_input("Prezzo medio di una coppa (€)", 0.0, value=8.5, step=0.1)
 
 st.header("Personale")
-available_workers = st.number_input("Lavoratori totali disponibili", 0, value=14, step=1)
+available_workers = st.number_input("Lavoratori totali disponibili", 0, value=13, step=1)
 workers_salary_for_round = st.number_input("Compenso di un interno per un turno (€)", 0.0, value=7.0, step=1.0)
 judges_salary_for_round = st.number_input("Compenso di un giudice esterno per un turno (€)", 0.0, value=10.0, step=1.0)
 
 # Inserisci i dizionari come JSON semplice
-workers_json = st.text_area("Lavoratori per turno (JSON)", '{"turno1": 13, "turno2": 13, "turno3": 13, "turno4": 14, "turno5": 14, "turno6": 0}')
+workers_json = st.text_area("Lavoratori per turno (JSON)", '{"turno1": 12, "turno2": 12, "turno3": 12, "turno4": 13, "turno5": 13, "turno6": 0}')
 judges_json = st.text_area("Giudici esterni per turno, non inclusi fra i lavoratori considerati prima (JSON)", '{"turno1": 0, "turno2": 0, "turno3": 0, "turno4": 1, "turno5": 0, "turno6": 0}')
 
 st.header("Altri costi / ricavi")
 food_cost = st.number_input("Costi per il cibo (€)", 0.0, value=25.0, step=1.0)
-photos_per_athlete = st.number_input("Stima della percentuale di foto vendute per ogni iscritto", 0.0, value=0.6, step=0.01)
+photos_per_athlete = st.number_input("Stima della percentuale di foto vendute per ogni iscritto", 0.0, value=0.55, step=0.01)
 profit_per_photo = st.number_input("Guadagno per foto (€)", 0.0, value=1.5, step=0.1)
 
 # --- 2. ELABORAZIONE ------------------------------------------------------
@@ -74,9 +74,9 @@ evento = TrofeoAmicizia(
 # --- 3. OUTPUT ------------------------------------------------------------
 with st.sidebar:
     st.header("Risultati")
-    st.metric("Fatturato", f"€{evento.revenue():,.2f}")
-    st.metric("Costi", f"€{evento.total_costs():,.2f}")
-    st.metric("Utile", f"€{evento.profit():,.2f}")
+    st.metric("Fatturato", f"€{evento.revenue:,.2f}")
+    st.metric("Costi", f"€{evento.total_costs:,.2f}")
+    st.metric("Utile", f"€{evento.profit:,.2f}")
 
     st.markdown("### Redditività")
     st.metric("Profit margin", f"{evento.profit_margin_pct():.1%}")
@@ -107,7 +107,8 @@ with st.sidebar:
         st.caption("Variazione del marginal profit all’aumentare di un atleta (seconda differenza discreta)."
                    " Perché serve: rileva economie di scala (> 0) o rendimenti decrescenti (< 0)."
                    " es: −0,25 € → il guadagno marginale sta calando: ogni nuovo atleta aggiunge meno utile del precedente (stai saturando le risorse)."
-                   "Come sfruttare l'economia di scala? I costi variabili devono s=calare all'aumentare degli iscritti: ")
+                   "Come sfruttare l'economia di scala? Si ha bisogno di ricavi extra o costi unitari calino man mano che superi determinate soglie di partecipanti: "
+                   "Sponsorship scalate e paganti per soglie di partecipanti, sconti quantità su medaglie, coppe, widget e servizi ad alto margine con costi quasi fissi.")
 
     st.markdown("### Pareggio")
     break_even= evento.break_even_participants()
@@ -134,25 +135,25 @@ for k, v in kpi_dettaglio.items():
 st.subheader("Costi")
 st.write(
     {
-        "Costi variabili": evento.variable_costs(),
-        "Costi fissi": evento.total_workers_cost(),
+        "Costi variabili": evento.variable_costs,
+        "Costi fissi": evento.total_workers_cost,
     }
 )
 
 st.subheader("Dettaglio costi")
 st.write(
     {
-        "Spesa per le medaglie di partecipazione": evento._participation_medals_cost(),
-        "Spesa per dei gadget": evento._gadget_cost(),
-        "Spesa per tutti i podii": evento.total_podium_cost(),
-        "Costo di tutti i lavoratori": evento.total_workers_cost(),
+        "Spesa per le medaglie di partecipazione": evento._participation_medals_cost,
+        "Spesa per dei gadget": evento._gadget_cost,
+        "Spesa per tutti i podii": evento.total_podium_cost,
+        "Costo di tutti i lavoratori": evento.total_workers_cost,
     }
 )
 
 st.subheader("Dettaglio ricavi")
 st.write(
     {
-        "Iscrizioni": evento._registration_sales(),
-        "Foto": evento._photo_sales(),
+        "Iscrizioni": evento._registration_sales,
+        "Foto": evento._photo_sales,
     }
 )

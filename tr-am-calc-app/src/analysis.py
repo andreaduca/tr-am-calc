@@ -11,7 +11,7 @@ def profit_sensitivity(instance, param: str, values) -> pd.DataFrame:
     """
     records = [
         {"x": v,
-         "profit": replace(instance, **{param: v}).profit()}        #Replace won
+         "profit": replace(instance, **{param: v}).profit}        #Replace won
         for v in values
     ]
     return pd.DataFrame(records)
@@ -31,13 +31,13 @@ def tornado(evento: TrofeoAmicizia, deltas=(0.1, -0.1)):
         "workers_salary_for_round": "Workers salary for round",
     }
     records = []
-    base_profit = evento.profit()
+    base_profit = evento.profit
     for field, label in params.items():
         for d in deltas:
             current = getattr(evento, field)
             changed = current * (1 + d)
             clone = replace(evento, **{field: changed})
-            delta_profit = clone.profit() - base_profit
+            delta_profit = clone.profit - base_profit
             records.append(
                 {"Parameter": label, "Scenario": f"{d:+.0%}", "ΔProfit": delta_profit}
             )

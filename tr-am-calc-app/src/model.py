@@ -31,75 +31,91 @@ class TrofeoAmicizia:
             raise ValueError("participants must be > 0")
 
     # Income
+    @property
     def _registration_sales(self) -> float:
         return self.participants * self.participation_price
 
+    @property
     def _tot_photos_exp(self) -> float:
         return self.participants * self.photos_per_atlete
 
+    @property
     def _photo_sales(self) -> float:
-        return self._tot_photos_exp() * self.profit_per_photo
+        return self._tot_photos_exp * self.profit_per_photo
 
+    @property
     def revenue(self) -> float:
-        return self._registration_sales() + self._photo_sales()
+        return self._registration_sales + self._photo_sales
 
     # Workers cost
+    @property
     def _workers_cost(self) -> float:
         workers_cost_acc = 0
         for workers in self.workers_for_round.values():
             workers_cost_acc += workers * self.workers_salary_for_round
         return workers_cost_acc
 
+    @property
     def _judges_cost(self) -> float:
         judges_cost_acc = 0
         for judges in self.judges_for_round.values():
             judges_cost_acc += judges * self.judges_salary_for_round
         return judges_cost_acc
 
+    @property
     def total_workers_cost(self) -> float:
-        return self._judges_cost() + self._workers_cost()
+        return self._judges_cost + self._workers_cost
 
     # Costs for the awarding
+    @property
     def _all_cups_cost(self) -> float:
         return (self.average_cup_price * 3
                 * self.categories
                 )
 
+    @property
     def _all_medals_podiums_cost(self) -> float:
         return (self.podiums_for_speciality_each_category
                 * self.categories
                 * self.average_podium_medal_price * 3
                 )
 
+    @property
     def total_podium_cost(self) -> float:
-        return self._all_cups_cost() + self._all_medals_podiums_cost()
+        return self._all_cups_cost + self._all_medals_podiums_cost
 
     # Costs of things to give to everyone
+    @property
     def _participation_medals_cost(self) -> float:
         return self.participation_medal_price * self.participants
 
+    @property
     def _gadget_cost(self) -> float:
         return self.participants * self.gadget_price
 
-
+    @property
     def awards_cost(self) -> float:
-        return (self.total_podium_cost()
-                + self._gadget_cost()
-                + self._participation_medals_cost()
+        return (self.total_podium_cost
+                + self._gadget_cost
+                + self._participation_medals_cost
                 )
 
     # Aggregation
+    @property
     def variable_costs(self) -> float:
-        return self.awards_cost()
+        return self.awards_cost
 
+    @property
     def fixed_costs(self) -> float:
-        return self.total_workers_cost() + self.food_cost
+        return self.total_workers_cost + self.food_cost
 
+    @property
     def total_costs(self) -> float:
-        return self.variable_costs() + self.fixed_costs()
+        return self.variable_costs + self.fixed_costs
 
+    @property
     def profit(self) -> float:
-        return self.revenue() - self.total_costs()
+        return self.revenue - self.total_costs
 
     # KPI
     def cost_per_participant(self) -> float:
@@ -110,7 +126,7 @@ class TrofeoAmicizia:
         - Confrontalo con il prezzo d’iscrizione; se il costo è vicino o superiore al
           prezzo, l’evento è in pareggio o in perdita su ogni partecipante.
         """
-        return self.total_costs() / self.participants
+        return self.total_costs / self.participants
 
     def profit_per_participant(self) -> float:
         """
@@ -119,7 +135,7 @@ class TrofeoAmicizia:
         - Valore positivo ⇒ ogni iscritto aggiunge € all’utile complessivo.
         - Valore negativo ⇒ ogni atleta diluisce o erode il profitto.
         """
-        return self.profit() / self.participants
+        return self.profit / self.participants
 
     def contribution_margin_per_participant(self) -> float:
         """
@@ -129,7 +145,7 @@ class TrofeoAmicizia:
         - Se è elevato, bastano pochi partecipanti per andare in pareggio;
           se ≤0, il modello di business è insostenibile.
         """
-        return ((self.revenue() - self.variable_costs()) /
+        return ((self.revenue - self.variable_costs) /
                 self.participants)
 
     def profit_margin_pct(self) -> float:
@@ -140,7 +156,7 @@ class TrofeoAmicizia:
         Confrontalo con edizioni precedenti o benchmark di settore;
         un margine in calo indica costi in crescita o ricavi in discesa.
         """
-        return self.profit() / self.revenue() if self.revenue() else 0.0
+        return self.profit / self.revenue if self.revenue else 0.0
 
     def break_even_participants(self) -> int:
         """
@@ -153,7 +169,7 @@ class TrofeoAmicizia:
         ≤0—raggiungere il pareggio è impossibile con i prezzi/costi attuali.
         """
         m = self.contribution_margin_per_participant()
-        return math.inf if m <= 0 else math.ceil(self.fixed_costs() / m)
+        return math.inf if m <= 0 else math.ceil(self.fixed_costs / m)
 
     def variable_to_fixed_ratio(self) -> float:
         """
@@ -163,7 +179,7 @@ class TrofeoAmicizia:
         <1 indica una struttura a costi fissi elevata; i profitti allora oscilleranno fortemente al
          variare del numero di partecipanti.
         """
-        return self.variable_costs() / self.fixed_costs() if self.fixed_costs() else math.inf
+        return self.variable_costs / self.fixed_costs if self.fixed_costs else math.inf
 
     def average_revenue_per_participant(self) -> float:
         """
@@ -173,7 +189,7 @@ class TrofeoAmicizia:
         Un ARPP in aumento indica una buona strategia di up-selling (es. foto, merchandising) o un
         incremento dei prezzi.
         """
-        return self.revenue() / self.participants
+        return self.revenue / self.participants
 
     def photo_revenue_ratio(self) -> float:
         """
@@ -182,7 +198,7 @@ class TrofeoAmicizia:
         Valori vicini a 1 (100%) indicano che le foto rappresentano la principale fonte di ricavo,
         mentre valori prossimi a 0 indicano che il fatturato è trainato dalle iscrizioni (o da altre fonti).
         """
-        return self._photo_sales() / self.revenue() if self.revenue() else 0.0
+        return self._photo_sales / self.revenue if self.revenue else 0.0
 
     def dprofit_dparticipants(self) -> float:
         """
@@ -196,7 +212,7 @@ class TrofeoAmicizia:
             return 0.0
         # Create a clone with one extra participant
         clone = replace(self, participants=self.participants + 1)
-        return clone.profit() - self.profit()
+        return clone.profit - self.profit
 
     def d2profit_dparticipants2(self) -> float:
         """
@@ -214,7 +230,7 @@ class TrofeoAmicizia:
         if self.participants <= 1:
             return 0.0
         # profit at n, n+1 and n-1 participants
-        p_n = self.profit()
-        p_np1 = replace(self, participants=self.participants + 1).profit()
-        p_nm1 = replace(self, participants=self.participants - 1).profit()
+        p_n = self.profit
+        p_np1 = replace(self, participants=self.participants + 1).profit
+        p_nm1 = replace(self, participants=self.participants - 1).profit
         return p_np1 - 2 * p_n + p_nm1
