@@ -15,9 +15,9 @@ class TrofeoAmicizia:
     average_podium_medal_price: float
     average_cup_price: float
 
-    available_workers: int
-    workers_for_round: dict
-    workers_salary_for_round: float
+    available_coaches: int
+    coaches_for_round: dict
+    coaches_salary_for_round: float
     judges_for_round: dict
     judges_salary_for_round: float
 
@@ -51,8 +51,8 @@ class TrofeoAmicizia:
     @property
     def _workers_cost(self) -> float:
         workers_cost_acc = 0
-        for workers in self.workers_for_round.values():
-            workers_cost_acc += workers * self.workers_salary_for_round
+        for workers in self.coaches_for_round.values():
+            workers_cost_acc += workers * self.coaches_salary_for_round
         return workers_cost_acc
 
     @property

@@ -28,7 +28,7 @@ def tornado(evento: TrofeoAmicizia, deltas=(0.1, -0.1)):
         "gadget_price": "Gadget cost",
         "categories": "Categories",
         "podiums_for_speciality_each_category": "Podiums for speciality each category",
-        "workers_salary_for_round": "Workers salary for round",
+        "coaches_salary_for_round": "Workers salary for round",
     }
     records = []
     base_profit = evento.profit
