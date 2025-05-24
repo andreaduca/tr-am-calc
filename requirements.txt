@@ -120,3 +120,4 @@ webencodings==0.5.1
 websocket-client==1.8.0
 
 weasyprint~=65.1
+kaleido
