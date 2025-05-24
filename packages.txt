@@ -6,4 +6,4 @@ libgdk-pixbuf2.0-0
 libffi8
 libxml2
 libxslt1.1
-shared-mime-info   # <- obbligatorio da v60
+shared-mime-info
