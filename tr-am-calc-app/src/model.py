@@ -30,6 +30,10 @@ class TrofeoAmicizia:
         if self.participants <= 1:
             raise ValueError("participants must be > 0")
 
+    @property
+    def name(self)-> str:
+        return "Trofeo dell'Amicizia"
+
     # Income
     @property
     def _registration_sales(self) -> float:

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="IT">
+<head>
+    <style>
+        body{font-family:sans-serif; margin:10mm 15mm 25mm 15mm; background:#fff;}
+        h1{font-size:24pt; font-weight:700; color:#0b22ba; text-align:center;}
+        h2{font-size:16pt; font-weight:600; color:#0b22ba; text-align:center;}
+        h3{font-size:13pt; font-weight:600; margin:1.2em 0 .4em; color:#444;}
+
+        table{width:90%; margin:0 auto 1em; border-collapse:collapse;}
+        table tr:nth-child(odd)  { background: #ffffff; }   /* riga 1,3,5…  */
+        table tr:nth-child(even) { background:#eef3ff; }   /* riga 2,4,6…  */
+        th{background:inherit; font-weight:600; text-align:left; padding: 2px 8px;}
+        td{font-weight:400; text-align:right; }
+        .kpi{font-weight:bold;}
+        /* footer in fondo a ogni pagina */
+        @page {
+            margin: 10mm 25mm 15mm 15mm;
+            @bottom-center {
+                content: "Generato con \"https://github.com/andreaduca/tr-am-calc\" il {{ today }}";
+                font-size: 12px;
+                color: #555;
+            }
+        }
+
+    </style>
+    <title>Trofeo dell'Amicizia</title>
+</head>
+
+<body>
+
+<img src="data:image/png;base64,{{ logo_b64 }}" alt="logo" style="float:right; width:100px;" />
+<h1 style="text-align: center">Report Economico</h1>
+<h2 style="text-align: center">{{ event_name }}</h2>
+
+<!-- Results -->
+<h3 style="text-align: center">Risultati</h3>
+<table>
+    {% for k, v in primary_kpi.items() %}
+    <tr><th style="text-align:left">{{ k }}</th><td class="kpi">{{ v }}</td></tr>
+    {% endfor %}
+</table>
+
+<!-- Input Data -->
+<h3 style="text-align: center">Dati di input</h3>
+<table>
+    {% for k, v in inputs.items() %}
+    <tr><th style="text-align:left">{{ k }}</th><td>{{ v }}</td></tr>
+    {% endfor %}
+</table>
+
+<h3 style="text-align: center">Presenze</h3>
+<table>
+    <tr>
+        <th style="text-align:left">Ruolo</th>
+        {% for t in rounds %}
+        <th>{{ t }}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th style="text-align:left">Allenatori</th>
+        {% for t in rounds %}
+        <td>{{ coaches_round.get(t, 0) }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th style="text-align:left">Giudici</th>
+        {% for t in rounds %}
+        <td>{{ judges_round.get(t, 0) }}</td>
+        {% endfor %}
+    </tr>
+</table>
+
+<!-- Secondary KPI -->
+<h3 style="text-align: center">Redditività</h3>
+<table>
+    {% for k, v in secondary_kpi.items() %}
+    <tr><th style="text-align:left">{{ k }}</th><td>{{ v }}</td></tr>
+    {% endfor %}
+</table>
+
+<!-- Charts -->
+<h3 style="text-align: center">Sensitività</h3>
+<img src="data:image/png;base64,{{ tornado_b64 }}" style="display: block; margin: 0 auto; max-width: 100%;" alt="tornado chart">
+
+</body>
+</html>

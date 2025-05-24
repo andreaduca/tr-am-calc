@@ -1,9 +1,8 @@
-import math
-
-from src.analysis import tornado
+from src.analysis import tornado_for_trofeo_amicizia
 from src.model import TrofeoAmicizia
-import streamlit as st
 import json
+from src.render_template import build_trofeo_amicizia_report
+import streamlit as st
 
 st.set_page_config(page_title="Trofeo Amicizia – simulatore", page_icon="🏆")
 st.title("Simulatore economico – Trofeo Amicizia")
@@ -23,12 +22,13 @@ avg_podium_medal_price = st.number_input("Prezzo medio di una medaglia per il po
 avg_cup_price = st.number_input("Prezzo medio di una coppa (€)", 0.0, value=8.5, step=0.1)
 
 st.header("Personale")
-available_workers = st.number_input("Lavoratori totali disponibili", 0, value=13, step=1)
-workers_salary_for_round = st.number_input("Compenso di un interno per un turno (€)", 0.0, value=7.0, step=1.0)
+available_coaches = st.number_input("Allenatori disponibili", 0, value=13, step=1)
+coaches_salary_for_round = st.number_input("Compenso di un allenatore per un turno (€)", 0.0, value=8.0, step=1.0)
+judges = st.number_input("Giudici esterni ", 0, value=1, step=1)
 judges_salary_for_round = st.number_input("Compenso di un giudice esterno per un turno (€)", 0.0, value=10.0, step=1.0)
 
 # Inserisci i dizionari come JSON semplice
-workers_json = st.text_area("Lavoratori per turno (JSON)", '{"turno1": 12, "turno2": 12, "turno3": 12, "turno4": 13, "turno5": 13, "turno6": 0}')
+workers_json = st.text_area("Lavoratori per turno (JSON)", '{"turno1": 12, "turno2": 12, "turno3": 11, "turno4": 12, "turno5": 12, "turno6": 0}')
 judges_json = st.text_area("Giudici esterni per turno, non inclusi fra i lavoratori considerati prima (JSON)", '{"turno1": 0, "turno2": 0, "turno3": 0, "turno4": 1, "turno5": 0, "turno6": 0}')
 
 st.header("Altri costi / ricavi")
@@ -61,9 +61,9 @@ evento = TrofeoAmicizia(
     podiums_for_speciality_each_category=podiums_speciality_each_category,
     average_podium_medal_price=avg_podium_medal_price,
     average_cup_price=avg_cup_price,
-    available_coaches=available_workers,
+    available_coaches=available_coaches,
     coaches_for_round=workers_for_round,
-    coaches_salary_for_round=workers_salary_for_round,
+    coaches_salary_for_round=coaches_salary_for_round,
     judges_for_round=judges_for_round,
     judges_salary_for_round=judges_salary_for_round,
     food_cost=food_cost,
@@ -72,7 +72,66 @@ evento = TrofeoAmicizia(
 )
 
 # --- 3. OUTPUT ------------------------------------------------------------
+tornado_chart = tornado_for_trofeo_amicizia(evento)
+
+inputs = {
+    "Partecipanti": evento.participants,
+    "Prezzo iscrizione (€)": evento.participation_price,
+    "Costo medaglia partecipazione (€)": evento.participation_medal_price,
+    "Costo gadget (€)": evento.gadget_price,
+    "Categorie": evento.categories,
+    "Podii di specialità": evento.podiums_for_speciality_each_category,
+    "Prezzo medaglia podio (€)": evento.average_podium_medal_price,
+    "Prezzo coppa (€)": evento.average_cup_price,
+    "Allenatori disponibili": evento.available_coaches,
+    "Giudici esterni": judges,
+    "Costo allenatore / turno (€)": evento.coaches_salary_for_round,
+    "Costo giudice / turno (€)": evento.judges_salary_for_round,
+    "Costo cibo (€)": evento.food_cost,
+    "Foto per atleta": evento.photos_per_atlete,
+    "Profitto per foto (€)": evento.profit_per_photo,
+}
+
+primary_kpi = {
+    "Fatturato": f"{evento.revenue:,.2f} €",
+    "Costi totali": f"{evento.total_costs:,.2f} €",
+    "Utile": f"{evento.profit:,.2f} €",
+    "Profit margin": f"{evento.profit_margin_pct():.2%}",
+}
+
+secondary_kpi = {
+    "ΔProfit / atleta": f"{evento.dprofit_dparticipants():,.2f} €",
+    "Δ²Profit / atleta": f"{evento.d2profit_dparticipants2():,.2f} €",
+    "Break-even iscritti": evento.break_even_participants(),
+    "ARPP": f"{evento.average_revenue_per_participant():,.2f} €",
+    "CPP": f"{evento.cost_per_participant():,.2f} €",
+    "Margine di contribuzione / atleta": f"{evento.contribution_margin_per_participant():,.2f} €",
+    "Variable / Fixed ratio": f"{evento.variable_to_fixed_ratio():.2f}",
+    "Photo revenue ratio": f"{evento.photo_revenue_ratio():.2%}",
+}
+
+rounds = sorted(
+    set(evento.coaches_for_round.keys()) |
+    set(evento.judges_for_round.keys())
+)                      # es. ['turno1', 'turno2', …]
+
+
 with st.sidebar:
+
+    # === bottone per generare il report ===
+    if st.button("Scarica report PDF"):
+        # TODO: rimuovere l'anteprima
+        pdf_bytes, html_preview = build_trofeo_amicizia_report(evento, tornado_chart, inputs=inputs, primary_kpi=primary_kpi, secondary_kpi=secondary_kpi, rounds=rounds)
+        st.download_button(
+            "Download PDF",
+            data=pdf_bytes,
+            file_name="report_evento.pdf",
+            mime="application/pdf"
+        )
+
+        with st.expander("Anteprima HTML"):
+            st.components.v1.html(html_preview, height=600, scrolling=True)
+
     st.header("Risultati")
     st.metric("Fatturato", f"€{evento.revenue:,.2f}")
     st.metric("Costi", f"€{evento.total_costs:,.2f}")
@@ -112,15 +171,15 @@ with st.sidebar:
 
     st.markdown("### Pareggio")
     break_even= evento.break_even_participants()
-    delta_break_even = evento.participants - break_even if break_even != math.inf else None
-    break_even_label = f"{break_even:,}" if break_even != math.inf else "∞"
+    delta_break_even = evento.participants - break_even if break_even > 0 else None
+    break_even_label = f"{break_even:,}" if break_even > 0 else "∞"
     st.metric(
         "Break-even iscritti",
         break_even_label,
-        delta=None if break_even == math.inf else f"{delta_break_even:+,}"
+        delta=None if break_even < 0 else f"{delta_break_even:+,}"
     )
 
-st.plotly_chart(tornado(evento))
+st.plotly_chart(tornado_chart)
 
 st.subheader("Metriche di dettaglio")
 

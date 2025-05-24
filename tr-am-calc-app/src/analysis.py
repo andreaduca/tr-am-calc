@@ -11,24 +11,24 @@ def profit_sensitivity(instance, param: str, values) -> pd.DataFrame:
     """
     records = [
         {"x": v,
-         "profit": replace(instance, **{param: v}).profit}        #Replace won
+         "profit": replace(instance, **{param: v}).profit}
         for v in values
     ]
     return pd.DataFrame(records)
 
-def tornado(evento: TrofeoAmicizia, deltas=(0.1, -0.1)):
+def tornado_for_trofeo_amicizia(evento: TrofeoAmicizia, deltas=(0.1, -0.1)):
     """
     Crea un tornado chart di sensitività dell'utile per ciascun parametro numerico.
     """
     params = {
-        "participation_price": "Ticket price",
-        "participants": "Participants",
-        "photos_per_atlete": "Photos each athlete",
-        "profit_per_photo": "Profit each photo",
-        "gadget_price": "Gadget cost",
-        "categories": "Categories",
-        "podiums_for_speciality_each_category": "Podiums for speciality each category",
-        "coaches_salary_for_round": "Workers salary for round",
+        "participation_price": "Prezzo iscrizione",
+        "participants": "Partecipanti",
+        "photos_per_atlete": "Foto per atleta",
+        "profit_per_photo": "Profitto per foto",
+        "gadget_price": "Costo dei gadget",
+        "categories": "Categorie",
+        "podiums_for_speciality_each_category": "Podii di specialità a cat.",
+        "coaches_salary_for_round": "Salario allenatori a turno",
     }
     records = []
     base_profit = evento.profit
@@ -48,6 +48,11 @@ def tornado(evento: TrofeoAmicizia, deltas=(0.1, -0.1)):
         x="ΔProfit",
         color="Scenario",
         orientation="h",
-        title="Profit sensitivity (Tornado)",
+        # title="Profit sensitivity (Tornado)",
+        color_discrete_map={"+10%": "green", "-10%": "red"},
+        template="plotly_white",
+    )
+    fig.update_layout(
+        yaxis_title=None,
     )
     return fig
